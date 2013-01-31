@@ -78,13 +78,18 @@ class GUI:
 	
 	def lock(self, caller, mixerdict, img):
 		""" Called when we should lock/unlock something. """
-		
+				
 		if caller.get_active():
 			mixerdict["isLocked"] = True
 			# Set icon to locked
 			img.set_from_icon_name(
 				"locked",
 				Gtk.IconSize.MENU)
+			# Reset all channels with the value of the first...
+			self.setvalue(mixerdict["control0"],
+				mixerdict["mixer"],
+				0,
+				mixerdict)
 		else:
 			mixerdict["isLocked"] = False
 			# Set icon to unlocked
@@ -233,9 +238,9 @@ class GUI:
 					#self.objects[card]["mixers"][mixer]["lock"].set_expand(False)
 					self.objects[card]["mixers"][mixer]["lockimg"] = Gtk.Image()
 					self.objects[card]["mixers"][mixer]["lockimg"].set_size_request(10,10)
-					self.objects[card]["mixers"][mixer]["lockimg"].set_from_icon_name(
-						"locked",
-						Gtk.IconSize.MENU)
+					#self.objects[card]["mixers"][mixer]["lockimg"].set_from_icon_name(
+					#	"locked",
+					#	Gtk.IconSize.MENU)
 					self.objects[card]["mixers"][mixer]["lock"].add(
 						self.objects[card]["mixers"][mixer]["lockimg"])
 					# connect to self.lock
@@ -243,8 +248,19 @@ class GUI:
 						"toggled", self.lock,
 						self.objects[card]["mixers"][mixer],
 						self.objects[card]["mixers"][mixer]["lockimg"])
-					# FIXME: should save lock state...
-					self.objects[card]["mixers"][mixer]["lock"].set_active(True)
+					# Check if the channels are at the same level, if
+					# yes lock, otherwise leave them unlocked.
+					if chanlist.count(chanlist[0]) == len(chanlist):
+						# lock
+						self.objects[card]["mixers"][mixer]["lock"].set_active(True)
+					else:
+						# unlock
+						self.objects[card]["mixers"][mixer]["lock"].set_active(False)
+						# FIXME: fire up self.lock as it seems to be not
+						# triggered by set_active()...
+						self.lock(self.objects[card]["mixers"][mixer]["lock"],
+							self.objects[card]["mixers"][mixer],
+							self.objects[card]["mixers"][mixer]["lockimg"])
 					self.objects[card]["mixers"][mixer]["bbox"].add(self.objects[card]["mixers"][mixer]["lock"])
 
 
@@ -287,6 +303,6 @@ class GUI:
 
 if __name__ == "__main__":
 	g = GUI()
-	GObject.threads_init()
+	#GObject.threads_init()
 	Gtk.main()
 	#GObject.threads_leave()
