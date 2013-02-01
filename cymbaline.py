@@ -118,7 +118,11 @@ class GUI:
 			# Mixers
 			self.objects[card]["mixers"] = {}
 			self.objects[card]["mixers"]["container"] = Gtk.HBox()
-			self.objects[card]["mixers"]["container"].set_spacing(7)
+			self.objects[card]["mixers"]["container"].pack_start(Gtk.Alignment(),
+				True,
+				True,
+				0)
+			self.objects[card]["mixers"]["container"].set_spacing(30)
 			for mixer in alsaaudio.mixers(cards.index(card)):
 				mixero = alsaaudio.Mixer(control=mixer, cardindex=cards.index(card))
 				self.objects[card]["mixers"][mixer] = {}
@@ -141,6 +145,8 @@ class GUI:
 				self.objects[card]["mixers"][mixer]["vbox"].pack_start(Gtk.Label(mixer), False, False, 5)
 				# Create the control hbox, add controls and add them to the vbox
 				self.objects[card]["mixers"][mixer]["controlhbox"] = Gtk.HBox()
+				self.objects[card]["mixers"][mixer]["controlhbox"].set_spacing(20)
+				self.objects[card]["mixers"][mixer]["controlhbox"].set_halign(Gtk.Align.CENTER)
 				# controls list
 				self.objects[card]["mixers"][mixer]["controls"] = []
 				chancount = -1
@@ -168,7 +174,7 @@ class GUI:
 					# Add to controlhbox
 					self.objects[card]["mixers"][mixer]["controlhbox"].pack_start(
 						self.objects[card]["mixers"][mixer]["control%s" % chancount],
-						True,
+						False,
 						True,
 						0)
 				self.objects[card]["mixers"][mixer]["vbox"].pack_start(
@@ -178,8 +184,10 @@ class GUI:
 					0)
 				
 				# Create a buttonbox...
-				self.objects[card]["mixers"][mixer]["bbox"] = Gtk.HButtonBox()
+				atleastone = False # If it remains false, fill the space with an alignment.
+				self.objects[card]["mixers"][mixer]["bbox"] = Gtk.HBox()
 				self.objects[card]["mixers"][mixer]["bbox"].set_spacing(10)
+				self.objects[card]["mixers"][mixer]["bbox"].set_halign(Gtk.Align.CENTER)
 				# Generate required buttons
 				
 				# Mute button
@@ -197,6 +205,7 @@ class GUI:
 					self.objects[card]["mixers"][mixer]["muteimg"].set_from_icon_name(
 						muteicon,
 						Gtk.IconSize.MENU)
+					self.objects[card]["mixers"][mixer]["muteimg"].set_size_request(20,20)
 					self.objects[card]["mixers"][mixer]["mute"].add(
 						self.objects[card]["mixers"][mixer]["muteimg"])
 					# Connect to self.mute
@@ -204,7 +213,12 @@ class GUI:
 						"toggled", self.mute,
 						mixero,
 						self.objects[card]["mixers"][mixer]["muteimg"])
-					self.objects[card]["mixers"][mixer]["bbox"].add(self.objects[card]["mixers"][mixer]["mute"])
+					self.objects[card]["mixers"][mixer]["bbox"].pack_start(
+						self.objects[card]["mixers"][mixer]["mute"],
+						False,
+						False,
+						0)
+					atleastone = True
 				except alsaaudio.ALSAAudioError:
 					# Rec button?
 					try:
@@ -221,6 +235,7 @@ class GUI:
 						self.objects[card]["mixers"][mixer]["recimg"].set_from_icon_name(
 							recicon,
 							Gtk.IconSize.MENU)
+						self.objects[card]["mixers"][mixer]["recimg"].set_size_request(20,20)
 						self.objects[card]["mixers"][mixer]["rec"].add(
 							self.objects[card]["mixers"][mixer]["recimg"])
 						# Connect to self.rec
@@ -228,7 +243,12 @@ class GUI:
 							"toggled", self.rec,
 							mixero,
 							self.objects[card]["mixers"][mixer]["recimg"])
-						self.objects[card]["mixers"][mixer]["bbox"].add(self.objects[card]["mixers"][mixer]["rec"])
+						self.objects[card]["mixers"][mixer]["bbox"].pack_start(
+							self.objects[card]["mixers"][mixer]["rec"],
+							False,
+							False,
+							0)
+						atleastone = True
 					except alsaaudio.ALSAAudioError:
 						pass
 
@@ -237,7 +257,8 @@ class GUI:
 					self.objects[card]["mixers"][mixer]["lock"] = Gtk.ToggleButton()
 					#self.objects[card]["mixers"][mixer]["lock"].set_expand(False)
 					self.objects[card]["mixers"][mixer]["lockimg"] = Gtk.Image()
-					self.objects[card]["mixers"][mixer]["lockimg"].set_size_request(10,10)
+					self.objects[card]["mixers"][mixer]["lock"].set_size_request(0,10)
+					self.objects[card]["mixers"][mixer]["lockimg"].set_size_request(20,20)
 					#self.objects[card]["mixers"][mixer]["lockimg"].set_from_icon_name(
 					#	"locked",
 					#	Gtk.IconSize.MENU)
@@ -261,9 +282,22 @@ class GUI:
 						self.lock(self.objects[card]["mixers"][mixer]["lock"],
 							self.objects[card]["mixers"][mixer],
 							self.objects[card]["mixers"][mixer]["lockimg"])
-					self.objects[card]["mixers"][mixer]["bbox"].add(self.objects[card]["mixers"][mixer]["lock"])
-
-
+					self.objects[card]["mixers"][mixer]["bbox"].pack_start(
+						self.objects[card]["mixers"][mixer]["lock"],
+						False,
+						False,
+						0)
+					atleastone = True
+				if not atleastone:
+					# fill the space.
+					align = Gtk.Alignment(yscale=0.0)
+					align.set_size_request(26.5,26.5)
+					self.objects[card]["mixers"][mixer]["bbox"].pack_start(
+						align,
+						True,
+						True,
+						0)
+					
 				self.objects[card]["mixers"][mixer]["vbox"].pack_start(
 					self.objects[card]["mixers"][mixer]["bbox"],
 					False,
