@@ -24,6 +24,10 @@ from gi.repository import Gtk, GObject
 
 import alsaaudio
 
+import t9n.library
+
+_ = t9n.library.translation_init("cymbaline")
+
 GLADEFILE = "./cymbaline.glade"
 
 cards = alsaaudio.cards()
@@ -46,37 +50,41 @@ class GUI:
 				control.set_value(scale.get_value())
 			self.processinglock = False
 	
-	def mute(self, caller, mixer, img):
+	def mute(self, caller, mixer, img, button, donotset=False):
 		""" Called when we should mute/unmute something. """
 		
-		mixer.setmute(caller.get_active())
+		if not donotset: mixer.setmute(caller.get_active())
 		if caller.get_active():
 			# Set icon to volume-muted
 			img.set_from_icon_name(
 				"audio-volume-muted",
 				Gtk.IconSize.MENU)
+			button.set_tooltip_text(_("Click to unmute."))
 		else:
 			# Set icon to volume-high
 			img.set_from_icon_name(
 				"audio-volume-high",
 				Gtk.IconSize.MENU)
+			button.set_tooltip_text(_("Click to mute."))
 	
-	def rec(self, caller, mixer, img):
+	def rec(self, caller, mixer, img, button, donotset=False):
 		""" Called when we should stop/start recording. """
 		
-		mixer.setrec(caller.get_active())
+		if not donotset: mixer.setrec(caller.get_active())
 		if caller.get_active():
 			# Set icon to record
 			img.set_from_icon_name(
 				"media-record",
 				Gtk.IconSize.MENU)
+			button.set_tooltip_text(_("Click to disable capturing."))
 		else:
 			# Set icon to playback-stop
 			img.set_from_icon_name(
 				"media-playback-stop",
-				Gtk.IconSize.MENU)	
+				Gtk.IconSize.MENU)
+			button.set_tooltip_text(_("Click to enable capturing."))
 	
-	def lock(self, caller, mixerdict, img):
+	def lock(self, caller, mixerdict, img, button):
 		""" Called when we should lock/unlock something. """
 				
 		if caller.get_active():
@@ -90,12 +98,14 @@ class GUI:
 				mixerdict["mixer"],
 				0,
 				mixerdict)
+			button.set_tooltip_text(_("Click to unlock."))
 		else:
 			mixerdict["isLocked"] = False
 			# Set icon to unlocked
 			img.set_from_icon_name(
 				"unlocked",
 				Gtk.IconSize.MENU)
+			button.set_tooltip_text(_("Click to lock."))
 	
 	def build_cards(self):
 		""" Builds cards pages. """
@@ -194,25 +204,31 @@ class GUI:
 				try:
 					mutestate = mixero.getmute() # will except if mic
 					self.objects[card]["mixers"][mixer]["mute"] = Gtk.ToggleButton()
-					# Check mutestate
-					muteicon = "audio-volume-high"
-					for channel in mutestate:
-						if channel == 1:
-							# Check only mute (yes)
-							muteicon = "audio-volume-muted"
-							self.objects[card]["mixers"][mixer]["mute"].set_active(True)
 					self.objects[card]["mixers"][mixer]["muteimg"] = Gtk.Image()
-					self.objects[card]["mixers"][mixer]["muteimg"].set_from_icon_name(
-						muteicon,
-						Gtk.IconSize.MENU)
 					self.objects[card]["mixers"][mixer]["muteimg"].set_size_request(20,20)
 					self.objects[card]["mixers"][mixer]["mute"].add(
 						self.objects[card]["mixers"][mixer]["muteimg"])
+						
+					# check mutestate
+					for channel in mutestate:
+						if channel == 1:
+							# Check only mute (yes)
+							self.objects[card]["mixers"][mixer]["mute"].set_active(True)
+
 					# Connect to self.mute
 					self.objects[card]["mixers"][mixer]["mute"].connect(
 						"toggled", self.mute,
 						mixero,
-						self.objects[card]["mixers"][mixer]["muteimg"])
+						self.objects[card]["mixers"][mixer]["muteimg"],
+						self.objects[card]["mixers"][mixer]["mute"])
+					
+					# Fire up self.mute
+					self.mute(self.objects[card]["mixers"][mixer]["mute"],
+						mixero,
+						self.objects[card]["mixers"][mixer]["muteimg"],
+						self.objects[card]["mixers"][mixer]["mute"],
+						donotset=True)
+					
 					self.objects[card]["mixers"][mixer]["bbox"].pack_start(
 						self.objects[card]["mixers"][mixer]["mute"],
 						False,
@@ -224,25 +240,31 @@ class GUI:
 					try:
 						recstate = mixero.getrec()
 						self.objects[card]["mixers"][mixer]["rec"] = Gtk.ToggleButton()
-						# Check recstate
-						recicon = "media-playback-stop"
-						for channel in recstate:
-							if channel == 1:
-								# Check only rec (yes)
-								recicon = "media-record"
-								self.objects[card]["mixers"][mixer]["rec"].set_active(True)
 						self.objects[card]["mixers"][mixer]["recimg"] = Gtk.Image()
-						self.objects[card]["mixers"][mixer]["recimg"].set_from_icon_name(
-							recicon,
-							Gtk.IconSize.MENU)
 						self.objects[card]["mixers"][mixer]["recimg"].set_size_request(20,20)
 						self.objects[card]["mixers"][mixer]["rec"].add(
 							self.objects[card]["mixers"][mixer]["recimg"])
+
+						# Check recstate
+						for channel in recstate:
+							if channel == 1:
+								# Check only rec (yes)
+								self.objects[card]["mixers"][mixer]["rec"].set_active(True)
+
 						# Connect to self.rec
 						self.objects[card]["mixers"][mixer]["rec"].connect(
 							"toggled", self.rec,
 							mixero,
-							self.objects[card]["mixers"][mixer]["recimg"])
+							self.objects[card]["mixers"][mixer]["recimg"],
+							self.objects[card]["mixers"][mixer]["rec"])
+
+						# Fire up self.rec
+						self.rec(self.objects[card]["mixers"][mixer]["rec"],
+							mixero,
+							self.objects[card]["mixers"][mixer]["recimg"],
+							self.objects[card]["mixers"][mixer]["rec"],
+							donotset=True)
+
 						self.objects[card]["mixers"][mixer]["bbox"].pack_start(
 							self.objects[card]["mixers"][mixer]["rec"],
 							False,
@@ -268,7 +290,8 @@ class GUI:
 					self.objects[card]["mixers"][mixer]["lock"].connect(
 						"toggled", self.lock,
 						self.objects[card]["mixers"][mixer],
-						self.objects[card]["mixers"][mixer]["lockimg"])
+						self.objects[card]["mixers"][mixer]["lockimg"],
+						self.objects[card]["mixers"][mixer]["lock"])
 					# Check if the channels are at the same level, if
 					# yes lock, otherwise leave them unlocked.
 					if chanlist.count(chanlist[0]) == len(chanlist):
