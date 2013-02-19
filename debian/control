@@ -11,7 +11,7 @@ Vcs-Browser: https://github.com/semplice/cymbaline
 
 Package: cymbaline
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, python-t9n, python-gi,
+Depends: ${shlibs:Depends}, ${python:Depends}, python-t9n, python-gi,
  gir1.2-gtk-3.0, python-alsaaudio
 Description: A simple GTK+3 mixer
  cymbaline is a simple GTK+3 mixer written in Python.
