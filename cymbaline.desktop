@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=Mixer
+Name[it_IT]=Mixer
+Comment=Adjust volume level
+Comment[it_IT]=Modifica il livello del volume
+Categories=AudioVideo;
+Exec=cymbaline
+Icon=multimedia-volume-control

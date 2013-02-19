@@ -26,9 +26,14 @@ import alsaaudio
 
 import t9n.library
 
+import os
+
 _ = t9n.library.translation_init("cymbaline")
 
-GLADEFILE = "./cymbaline.glade"
+GLADEFILE = os.path.join(os.path.dirname(os.path.realpath(__file__)), "cymbaline.glade")
+if not os.path.exists(GLADEFILE):
+	# fallback to the package one
+	GLADEFILE = "/usr/share/cymbaline/cymbaline.glade"
 
 cards = alsaaudio.cards()
 
@@ -122,12 +127,11 @@ class GUI:
 			self.objects[card]["label"] = Gtk.Label(card)
 			self.objects[card]["frame_label"].set_markup("<b>%s</b>" % card)
 			self.objects[card]["frame"].set_label_widget(self.objects[card]["frame_label"])
-			#self.objects[card]["frame"].add(self.objects[card]["test"])
-			#self.objects[card]["scroll"].add_with_viewport(self.objects[card]["frame"])
 			
 			# Mixers
 			self.objects[card]["mixers"] = {}
 			self.objects[card]["mixers"]["container"] = Gtk.HBox()
+			self.objects[card]["mixers"]["container"].grab_focus()
 			self.objects[card]["mixers"]["container"].pack_start(Gtk.Alignment(),
 				True,
 				True,
@@ -140,6 +144,7 @@ class GUI:
 				
 				# Create the main vbox and add it to the container
 				self.objects[card]["mixers"][mixer]["vbox"] = Gtk.VBox()
+				self.objects[card]["mixers"][mixer]["vbox"].grab_focus()
 				self.objects[card]["mixers"][mixer]["vbox"].set_spacing(5)
 				self.objects[card]["mixers"]["container"].pack_start(
 					self.objects[card]["mixers"][mixer]["vbox"],
@@ -277,13 +282,9 @@ class GUI:
 				# Lock button
 				if (len(chanlist) > 1):
 					self.objects[card]["mixers"][mixer]["lock"] = Gtk.ToggleButton()
-					#self.objects[card]["mixers"][mixer]["lock"].set_expand(False)
 					self.objects[card]["mixers"][mixer]["lockimg"] = Gtk.Image()
 					self.objects[card]["mixers"][mixer]["lock"].set_size_request(0,10)
 					self.objects[card]["mixers"][mixer]["lockimg"].set_size_request(20,20)
-					#self.objects[card]["mixers"][mixer]["lockimg"].set_from_icon_name(
-					#	"locked",
-					#	Gtk.IconSize.MENU)
 					self.objects[card]["mixers"][mixer]["lock"].add(
 						self.objects[card]["mixers"][mixer]["lockimg"])
 					# connect to self.lock
@@ -328,7 +329,6 @@ class GUI:
 					20)
 
 			self.objects[card]["scroll"].add_with_viewport(self.objects[card]["mixers"]["container"])
-			#self.objects[card]["frame"].add(self.objects[card]["mixers"]["container"])
 			self.notebook.append_page(self.objects[card]["scroll"], tab_label=self.objects[card]["label"])	
 	
 	def __init__(self):
@@ -360,6 +360,4 @@ class GUI:
 
 if __name__ == "__main__":
 	g = GUI()
-	#GObject.threads_init()
 	Gtk.main()
-	#GObject.threads_leave()
