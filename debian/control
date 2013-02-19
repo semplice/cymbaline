@@ -1,0 +1,19 @@
+Source: cymbaline
+Section: sound
+Priority: optional
+Maintainer: Eugenio Paolantonio (g7) <me@medesimo.eu>
+Build-Depends: python (>= 2.6.6-3), python2.7, debhelper (>= 8.0.0)
+X-Python-Version: >= 2.7
+Standards-Version: 3.9.4
+Homepage: http://github.com/semplice/cymbaline
+Vcs-Git: git://github.com/semplice/cymbaline.git
+Vcs-Browser: https://github.com/semplice/cymbaline
+
+Package: cymbaline
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-t9n, python-gi,
+ gir1.2-gtk-3.0, python-alsaaudio
+Description: A simple GTK+3 mixer
+ cymbaline is a simple GTK+3 mixer written in Python.
+ .
+ It uses directly ALSA via the python-alsaaudio library.
