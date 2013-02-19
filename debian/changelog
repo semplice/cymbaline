@@ -1,3 +1,9 @@
+cymbaline (1.0.0-3) unstable; urgency=low
+
+  * Removed ${shlibs:Depends} and readded ${misc:Depends}
+
+ -- Eugenio Paolantonio (g7) <me@medesimo.eu>  Tue, 19 Feb 2013 19:08:59 +0100
+
 cymbaline (1.0.0-2) unstable; urgency=low
 
   * Use ${python:Depends} in control.
