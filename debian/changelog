@@ -1,3 +1,11 @@
+cymbaline (1.0.1-1) unstable; urgency=low
+
+  * Changed the unlocked icon ('unlocked' is not in Faenza).
+  * debian/control: architecture: any --> all
+  * debian/rules: nsure we invoke dh_python2
+
+ -- Eugenio Paolantonio (g7) <me@medesimo.eu>  Fri, 01 Mar 2013 19:01:26 +0100
+
 cymbaline (1.0.0-3) unstable; urgency=low
 
   * Removed ${shlibs:Depends} and readded ${misc:Depends}
