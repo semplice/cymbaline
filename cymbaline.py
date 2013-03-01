@@ -108,7 +108,8 @@ class GUI:
 			mixerdict["isLocked"] = False
 			# Set icon to unlocked
 			img.set_from_icon_name(
-				"unlocked",
+			#	"unlocked",
+				"lock", # This is for the Faenza icon set.
 				Gtk.IconSize.MENU)
 			button.set_tooltip_text(_("Click to lock."))
 	
