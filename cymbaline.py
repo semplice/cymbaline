@@ -55,7 +55,7 @@ class GUI:
 				control.set_value(scale.get_value())
 			self.processinglock = False
 	
-	def mute(self, caller, mixer, img, button, donotset=False):
+	def mute(self, caller, mixer, img, donotset=False):
 		""" Called when we should mute/unmute something. """
 		
 		if not donotset: mixer.setmute(caller.get_active())
@@ -64,15 +64,15 @@ class GUI:
 			img.set_from_icon_name(
 				"audio-volume-muted",
 				Gtk.IconSize.MENU)
-			button.set_tooltip_text(_("Click to unmute."))
+			caller.set_tooltip_text(_("Click to unmute."))
 		else:
 			# Set icon to volume-high
 			img.set_from_icon_name(
 				"audio-volume-high",
 				Gtk.IconSize.MENU)
-			button.set_tooltip_text(_("Click to mute."))
+			caller.set_tooltip_text(_("Click to mute."))
 	
-	def rec(self, caller, mixer, img, button, donotset=False):
+	def rec(self, caller, mixer, img, donotset=False):
 		""" Called when we should stop/start recording. """
 		
 		if not donotset: mixer.setrec(caller.get_active())
@@ -81,15 +81,15 @@ class GUI:
 			img.set_from_icon_name(
 				"media-record",
 				Gtk.IconSize.MENU)
-			button.set_tooltip_text(_("Click to disable capturing."))
+			caller.set_tooltip_text(_("Click to disable capturing."))
 		else:
 			# Set icon to playback-stop
 			img.set_from_icon_name(
 				"media-playback-stop",
 				Gtk.IconSize.MENU)
-			button.set_tooltip_text(_("Click to enable capturing."))
+			caller.set_tooltip_text(_("Click to enable capturing."))
 	
-	def lock(self, caller, mixerdict, img, button):
+	def lock(self, caller, mixerdict, img):
 		""" Called when we should lock/unlock something. """
 				
 		if caller.get_active():
@@ -103,7 +103,7 @@ class GUI:
 				mixerdict["mixer"],
 				0,
 				mixerdict)
-			button.set_tooltip_text(_("Click to unlock."))
+			caller.set_tooltip_text(_("Click to unlock."))
 		else:
 			mixerdict["isLocked"] = False
 			# Set icon to unlocked
@@ -111,7 +111,7 @@ class GUI:
 			#	"unlocked",
 				"lock", # This is for the Faenza icon set.
 				Gtk.IconSize.MENU)
-			button.set_tooltip_text(_("Click to lock."))
+			caller.set_tooltip_text(_("Click to lock."))
 	
 	def build_cards(self):
 		""" Builds cards pages. """
@@ -225,14 +225,12 @@ class GUI:
 					self.objects[card]["mixers"][mixer]["mute"].connect(
 						"toggled", self.mute,
 						mixero,
-						self.objects[card]["mixers"][mixer]["muteimg"],
-						self.objects[card]["mixers"][mixer]["mute"])
+						self.objects[card]["mixers"][mixer]["muteimg"])
 					
 					# Fire up self.mute
 					self.mute(self.objects[card]["mixers"][mixer]["mute"],
 						mixero,
 						self.objects[card]["mixers"][mixer]["muteimg"],
-						self.objects[card]["mixers"][mixer]["mute"],
 						donotset=True)
 					
 					self.objects[card]["mixers"][mixer]["bbox"].pack_start(
@@ -261,14 +259,12 @@ class GUI:
 						self.objects[card]["mixers"][mixer]["rec"].connect(
 							"toggled", self.rec,
 							mixero,
-							self.objects[card]["mixers"][mixer]["recimg"],
-							self.objects[card]["mixers"][mixer]["rec"])
+							self.objects[card]["mixers"][mixer]["recimg"])
 
 						# Fire up self.rec
 						self.rec(self.objects[card]["mixers"][mixer]["rec"],
 							mixero,
 							self.objects[card]["mixers"][mixer]["recimg"],
-							self.objects[card]["mixers"][mixer]["rec"],
 							donotset=True)
 
 						self.objects[card]["mixers"][mixer]["bbox"].pack_start(
@@ -292,8 +288,7 @@ class GUI:
 					self.objects[card]["mixers"][mixer]["lock"].connect(
 						"toggled", self.lock,
 						self.objects[card]["mixers"][mixer],
-						self.objects[card]["mixers"][mixer]["lockimg"],
-						self.objects[card]["mixers"][mixer]["lock"])
+						self.objects[card]["mixers"][mixer]["lockimg"])
 					# Check if the channels are at the same level, if
 					# yes lock, otherwise leave them unlocked.
 					if chanlist.count(chanlist[0]) == len(chanlist):
