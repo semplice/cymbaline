@@ -6,7 +6,7 @@
 from distutils.core import setup
 
 setup(name='cymbaline',
-	version='1.0.1',
+	version='1.0.3',
 	description='a simple GTK+3 mixer application',
 	author='Eugenio Paolantonio',
 	author_email='me@medesimo.eu',
